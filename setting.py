@@ -6,8 +6,8 @@ class Setting:
         self.width = 800
         self.height = 600
         self.bg_color = (230, 230, 230)
-        self.ship_speed = 1.5
-        self.clock = 90
+        self.ship_speed = 2.5
+        self.clock = 60
 
         self.bullet_speed = 5
         self.bullet_width = 3

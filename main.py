@@ -23,7 +23,12 @@ class Aliengame:
         #存储Ship（）类
         self.bullets = pygame.sprite.Group()
         #创建子弹编组
-        self.attack_speed = self.setting.attack_speed - 1
+        self.attack_count = 0
+        self.a_c = self.attack_count
+        #攻击计时器
+        self.attack_speed = self.setting.attack_speed
+        self.a_s = self.attack_speed
+        #攻击速度
         self.bullet_permit = False
         self.clock = pygame.time.Clock()
         #帧率限制，机子不稳定造成的游戏不稳定
@@ -96,21 +101,15 @@ class Aliengame:
 
     def _fire_bullet(self):
         """子弹函数"""
-        if  self.bullet_permit:
-            self.attack_speed += 1
-            if self.attack_speed % self.setting.attack_speed == 0:
+        if self.a_c != self.a_s:
+            self.a_c += 1
+        elif self.bullet_permit and self.a_c == self.a_s:
                 new_bullet = Bullet(self)
                 # 赋予类
                 self.bullets.add(new_bullet)
                 # 添加子弹
-        else:
-            if (self.attack_speed % self.setting.attack_speed !=
-                    (self.setting.attack_speed - 1)):
-                self.attack_speed += 1
-        if self.attack_speed >= 1000000:
-            self.attack_speed = -1
-        print(self.attack_speed)
-
+                self.a_c = 0
+        print(self.a_c)
 
 if __name__ == '__main__':
     game = Aliengame()
