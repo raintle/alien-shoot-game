@@ -16,8 +16,12 @@ class Ship:
         #获取图片中央坐标
 
         self.rect.midbottom = self.screen_rect.midbottom
-        #
+        #初始化飞船坐标
 
     def blitme(self):
-
+        """绘制飞船"""
         self.screen.blit(self.image, self.rect)
+
+    def update(self):
+        """飞船坐标更新"""
+        pass

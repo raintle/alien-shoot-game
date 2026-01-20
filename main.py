@@ -14,17 +14,28 @@ class Aliengame:
         #分辨率设置
         self.ship = Ship(self)
 
+
+
     def run_game(self):
         while True:
-            for event in pygame.event.get():
-                #监视键盘事件
-                if event.type == pygame.QUIT:
-                    sys.exit()
-            self.screen.fill(self.setting.bg_color)
-            self.ship.blitme()
-            #屏幕颜色
-            pygame.display.flip()
-            #事件刷新
+            self._check_events()
+            self._update_screen()
+
+    @staticmethod
+    def _check_events():
+
+        for event in pygame.event.get():
+            # 监视键盘事件
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+    def _update_screen(self):
+        self.screen.fill(self.setting.bg_color)
+        # 屏幕颜色
+        self.ship.blitme()
+        # 绘制飞船
+        pygame.display.flip()
+        # 事件刷新
 
 if __name__ == '__main__':
     game = Aliengame()
