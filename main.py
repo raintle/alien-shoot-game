@@ -29,10 +29,8 @@ class Aliengame:
         self.bullets = pygame.sprite.Group()
         #创建子弹编组
         self.attack_count = 0
-        self.a_c = self.attack_count
         #攻击计时器
         self.attack_speed = self.setting.attack_speed
-        self.a_s = self.attack_speed
         #攻击速度
         self.bullet_permit = False
         self.clock = pygame.time.Clock()
@@ -110,15 +108,15 @@ class Aliengame:
 
     def _fire_bullet(self):
         """子弹函数"""
-        if self.a_c != self.a_s:
-            self.a_c += 1
-        elif self.bullet_permit and self.a_c == self.a_s:
+        if self.attack_count != self.attack_speed:
+            self.attack_count += 1
+        elif self.bullet_permit and self.attack_count == self.attack_speed:
                 new_bullet = Bullet(self)
                 # 赋予类
                 self.bullets.add(new_bullet)
                 # 添加子弹
-                self.a_c = 0
-        print(self.a_c)
+                self.attack_count = 0
+        print(self.attack_count)
 
     def _create_fleet(self):
         # 第一步：创建临时敌人对象，仅用于获取敌人的宽高尺寸（所有敌人尺寸一致）
