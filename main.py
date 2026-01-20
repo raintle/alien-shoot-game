@@ -1,5 +1,7 @@
 import sys
 import pygame
+
+from bullet import Bullet
 from setting import Setting
 from ship import Ship
 
@@ -19,8 +21,11 @@ class Aliengame:
         #分辨率设置
         self.ship = Ship(self)
         #存储Ship（）类
+        self.bullets = pygame.sprite.Group()
+        #创建子弹编组
         self.clock = pygame.time.Clock()
         #帧率限制，机子不稳定造成的游戏不稳定
+
 
 
 
@@ -30,6 +35,7 @@ class Aliengame:
             self._check_events()
             self._update_screen()
 
+            print(len(self.bullets))
     def _check_events(self):
         """事件响应"""
         for event in pygame.event.get():
@@ -49,6 +55,9 @@ class Aliengame:
             self.ship.move_left = True
         if event.key == pygame.K_RIGHT:
             self.ship.move_right = True
+        if event.key == pygame.K_SPACE:
+            self._fire_bullet()
+            #绘制子弹
         if event.key == pygame.K_q:
             #按q时推出系统
             sys.exit()
@@ -59,6 +68,10 @@ class Aliengame:
             self.ship.move_left = False
         if event.key == pygame.K_RIGHT:
             self.ship.move_right = False
+        if event.key == pygame.K_SPACE:
+            self._fire_bullet()
+                # 绘制子弹
+
 
     def _update_screen(self):
         """屏幕绘制"""
@@ -67,9 +80,24 @@ class Aliengame:
         self.ship.blitme()
         self.ship.update()
         # 绘制飞船
+        self.bullets.update()
+        #绘制子弹
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
         pygame.display.flip()
         # 事件刷新
         self.clock.tick(self.setting.clock)
+
+    def _fire_bullet(self):
+        """子弹函数"""
+        new_bullet = Bullet(self)
+        #赋予类
+        self.bullets.add(new_bullet)
+        #添加子弹
+
 
 if __name__ == '__main__':
     game = Aliengame()
