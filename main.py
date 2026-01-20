@@ -4,6 +4,7 @@ import pygame
 from bullet import Bullet
 from setting import Setting
 from ship import Ship
+from enemies import Enemy
 
 class Aliengame:
 
@@ -21,6 +22,9 @@ class Aliengame:
         #分辨率设置
         self.ship = Ship(self)
         #存储Ship（）类
+        self.enemies = pygame.sprite.Group()
+        #创建敌人编组
+        self._create_enemies()
         self.bullets = pygame.sprite.Group()
         #创建子弹编组
         self.attack_count = 0
@@ -93,6 +97,10 @@ class Aliengame:
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
+            #消除子弹
+
+        self.enemies.draw(self.screen)
+        #绘制敌人
 
         self._fire_bullet()
         pygame.display.flip()
@@ -110,6 +118,31 @@ class Aliengame:
                 # 添加子弹
                 self.a_c = 0
         print(self.a_c)
+
+    def _create_enemies(self):
+
+        # 创建一个临时敌人对象（用于获取敌人宽度）
+        enemy = Enemy(self)
+        # 获取单个敌人的宽度（从敌人的矩形碰撞框中获取）
+        enemy_width = enemy.rect.width
+        # 计算窗口中可用于放置敌人的水平空间
+        # 逻辑：总窗口宽度 - 左右各留1个敌人宽度的边距 = 可用水平空间
+        available_space_x = self.setting.width - (2 * enemy_width)
+        # 计算一行能容纳的敌人数量
+        # 逻辑：可用空间 // 每个敌人占用的宽度（自身宽度 + 间距宽度，这里间距也是1个敌人宽度）
+        number_enemies_x = available_space_x // (2 * enemy_width)
+
+        # 循环生成对应数量的敌人
+        for enemy_number in range(number_enemies_x):
+            # 为每个位置创建一个新的敌人对象
+            enemy = Enemy(self)
+            # 计算当前敌人的水平坐标（核心定位逻辑）
+            # 公式：左边距(1个enemy_width) + 2*enemy_width * 敌人序号
+            enemy.x = enemy_width + 2 * enemy_width * enemy_number
+            # 将计算好的x坐标赋值给敌人的碰撞框x轴位置（决定敌人在屏幕上的显示位置）
+            enemy.rect.x = enemy.x
+            # 将生成的敌人添加到敌人组（用于统一管理，比如批量绘制、检测碰撞）
+            self.enemies.add(enemy)
 
 if __name__ == '__main__':
     game = Aliengame()
