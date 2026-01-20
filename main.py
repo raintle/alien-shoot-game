@@ -24,6 +24,7 @@ class Aliengame:
         #存储Ship（）类
         self.enemies = pygame.sprite.Group()
         #创建敌人编组
+        self._create_fleet()
         self._create_enemies()
         self.bullets = pygame.sprite.Group()
         #创建子弹编组
@@ -119,30 +120,60 @@ class Aliengame:
                 self.a_c = 0
         print(self.a_c)
 
-    def _create_enemies(self):
-
-        # 创建一个临时敌人对象（用于获取敌人宽度）
+    def _create_fleet(self):
+        # 第一步：创建临时敌人对象，仅用于获取敌人的宽高尺寸（所有敌人尺寸一致）
         enemy = Enemy(self)
-        # 获取单个敌人的宽度（从敌人的矩形碰撞框中获取）
-        enemy_width = enemy.rect.width
-        # 计算窗口中可用于放置敌人的水平空间
-        # 逻辑：总窗口宽度 - 左右各留1个敌人宽度的边距 = 可用水平空间
+        # 第二步：一次性获取敌人的宽度和高度（rect.size返回元组：(宽度, 高度)）
+        enemy_width, enemy_height = enemy.rect.size
+
+        # 第三步：计算水平方向可放置敌人的空间
+        # 逻辑：总窗口宽度 - 左右各留1个敌人宽度的边距 = 水平可用空间
         available_space_x = self.setting.width - (2 * enemy_width)
-        # 计算一行能容纳的敌人数量
-        # 逻辑：可用空间 // 每个敌人占用的宽度（自身宽度 + 间距宽度，这里间距也是1个敌人宽度）
+        # 第四步：计算一行能容纳的敌人数量
+        # 逻辑：可用空间 // 每个敌人占用的水平空间（自身宽度 + 1个敌人宽度的间距）
         number_enemies_x = available_space_x // (2 * enemy_width)
 
-        # 循环生成对应数量的敌人
-        for enemy_number in range(number_enemies_x):
-            # 为每个位置创建一个新的敌人对象
-            enemy = Enemy(self)
-            # 计算当前敌人的水平坐标（核心定位逻辑）
-            # 公式：左边距(1个enemy_width) + 2*enemy_width * 敌人序号
-            enemy.x = enemy_width + 2 * enemy_width * enemy_number
-            # 将计算好的x坐标赋值给敌人的碰撞框x轴位置（决定敌人在屏幕上的显示位置）
-            enemy.rect.x = enemy.x
-            # 将生成的敌人添加到敌人组（用于统一管理，比如批量绘制、检测碰撞）
-            self.enemies.add(enemy)
+        # 第五步：获取玩家飞船的高度（用于预留底部空间）
+        ship_height = self.ship.rect.height
+
+        # 第六步：计算垂直方向可放置敌人的空间
+        # 逻辑：总窗口高度 - 顶部留1个敌人高度边距 - 底部留飞船高度+2个敌人高度的空间 - 其他边距
+        # （3*enemy_height = 顶部1个 + 底部2个，避免敌人贴飞船）
+        available_space_y = (self.setting.height - (3 * enemy_height) - ship_height)
+        # 第七步：计算能容纳的敌人行数
+        # 逻辑：垂直可用空间 // 每行敌人占用的垂直空间（自身高度 + 1个敌人高度的间距）
+        number_rows = available_space_y // (2 * enemy_height)
+
+        # 第八步：把计算好的“每行敌人数量”和“总行数”保存为实例变量
+        # 供另一个函数_create_enemies调用
+        self.number_rows = number_rows
+        self.number_enemies_x = number_enemies_x
+
+    def _create_enemies(self):
+        # 第一步：外层循环——遍历每一行（控制敌人的垂直位置）
+        for row in range(self.number_rows):
+            # 第二步：内层循环——遍历当前行的每个敌人（控制敌人的水平位置）
+            for enemy_number in range(self.number_enemies_x):
+                # 第三步：为当前位置创建一个新的敌人对象（真正要显示的敌人）
+                enemy = Enemy(self)
+                # 第四步：重新获取敌人宽高（避免临时对象的尺寸失效，更健壮）
+                enemy_width, enemy_height = enemy.rect.size
+
+                # 第五步：计算当前敌人的水平坐标（x轴）
+                # 公式：左边距(1*enemy_width) + 2*enemy_width * 敌人在本行的序号
+                # 保证每个敌人水平间距为1个敌人宽度
+                enemy.x = enemy_width + 2 * enemy_width * enemy_number
+                # 第六步：将计算的x坐标同步到敌人的碰撞框（决定屏幕显示位置）
+                enemy.rect.x = enemy.x
+
+                # 第七步：计算当前敌人的垂直坐标（y轴）
+                # 公式：顶部边距(1*enemy_height) + 2*enemy_height * 行号
+                # 保证每行敌人垂直间距为1个敌人高度
+                enemy.rect.y = enemy_height + 2 * enemy_height * row
+
+                # 第八步：将当前敌人添加到敌人组（用于批量管理：绘制、碰撞检测、移动等）
+                self.enemies.add(enemy)
+
 
 if __name__ == '__main__':
     game = Aliengame()
